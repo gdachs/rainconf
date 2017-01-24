@@ -20,3 +20,4 @@ find_package(Threads REQUIRED)
 target_link_libraries(rainconf ${p8-platform_LIBRARIES})
 target_link_libraries(rainconf ${CMAKE_THREAD_LIBS_INIT})
 
+install(TARGETS rainconf DESTINATION bin/.)
