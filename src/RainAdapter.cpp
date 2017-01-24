@@ -1,8 +1,7 @@
 #include <iostream>
-
-#include "serialport.h"
 #include <p8-platform/util/util.h>
 
+#include "serialport.h"
 #include "RainAdapter.h"
 
 using namespace P8PLATFORM;
