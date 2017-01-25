@@ -16,7 +16,7 @@
 class RainAdapter: public P8PLATFORM::CThread
 {
 public:
-	RainAdapter(const char *deviceName);
+	RainAdapter(const char *deviceName, std::map<char, std::vector<std::string> > commandMap);
 
 	virtual ~RainAdapter(void);
 

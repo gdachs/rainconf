@@ -11,7 +11,7 @@ CHECK_FUNCTION_EXISTS(flock HAVE_FLOCK)
 # write env.h
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/env.h.in ${CMAKE_CURRENT_SOURCE_DIR}/env.h)
 
-add_executable(rainconf rainconf.cpp RainAdapter.cpp serialport.cpp)
+add_executable(rainconf rainconf.cpp RainAdapter.cpp serialport.cpp Split.cpp)
 
 find_package(P8-platform REQUIRED)
 

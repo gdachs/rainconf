@@ -7,7 +7,7 @@
 
 using namespace P8PLATFORM;
 
-RainAdapter::RainAdapter(const char *deviceName) :
+RainAdapter::RainAdapter(const char *deviceName, std::map<char, std::vector<std::string> > commandMap) :
 		m_gotResponse(false), m_commandResponseMap(
 				CreateMap<char, std::string>('B', "BDR")('C', "CFG")('O', "OSD")(
 						'X', "REC"))
