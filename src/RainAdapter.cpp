@@ -7,11 +7,11 @@
 
 using namespace P8PLATFORM;
 
-RainAdapter::RainAdapter(const char *deviceName, std::map<char, std::vector<std::string> > commandMap) :
+RainAdapter::RainAdapter(const char *deviceName) :
 		m_gotResponse(false), m_commandResponseMap(
-				CreateMap<char, std::string>('B', "BDR")('C', "CFG")('O', "OSD")(
-						'X', "REC"))
-
+				CreateMap<char, std::string>('A', "ADR")('B', "BDR")('C', "CFG")(
+						'O', "OSD")('P', "PHY")('Q', "QTY")('R', "REV")('X',
+						"STA"))
 {
 	CLockObject lock(m_mutex);
 
@@ -23,6 +23,39 @@ RainAdapter::~RainAdapter(void)
 {
 	Close();
 	SAFE_DELETE(m_port);
+}
+
+void RainAdapter::processCommands(
+		std::map<char, std::vector<std::string> > commandMap)
+{
+	if (!IsOpen())
+	{
+		Open();
+	}
+	for (std::map<char, std::vector<std::string> >::iterator cmdIt =
+			commandMap.begin(); cmdIt != commandMap.end(); ++cmdIt)
+	{
+		std::string command("!");
+
+		command += cmdIt->first;
+		for (std::vector<std::string>::iterator vecIt = cmdIt->second.begin();
+				vecIt != cmdIt->second.end(); ++vecIt)
+		{
+			command += " " + *vecIt;
+		}
+		command += '~';
+
+		if (WriteAdapterCommand(command,
+				m_commandResponseMap[cmdIt->first].c_str()))
+		{
+			std::cout << m_response << std::endl;
+		}
+		else
+		{
+			std::cerr << "got wrong response for command: " << command
+					<< " response: " << m_response << std::endl;
+		}
+	}
 }
 
 bool RainAdapter::IsOpen(void)
@@ -83,13 +116,9 @@ bool RainAdapter::Open(uint32_t iTimeoutMs /* = CEC_DEFAULT_CONNECT_TIMEOUT */)
 		return false;
 	}
 
-	std::cerr
-			<< "connection opened, clearing any previous input and waiting for active transmissions to end before starting"
-			<< std::endl;
-
 	m_response[0] = '\0';
-	m_gotResponse = true;
-	m_condition.Signal();
+//	m_gotResponse = true;
+//	m_condition.Signal();
 
 	if (!CreateThread())
 	{
@@ -123,15 +152,17 @@ void RainAdapter::Close(void)
 		m_port->Close();
 }
 
-bool RainAdapter::WriteAdapterCommand(char *command, const char *response)
+bool RainAdapter::WriteAdapterCommand(std::string &command, const char *response)
 {
-	if (m_port->Write(command, strlen(command)) != (ssize_t) strlen(command))
+	CLockObject lock(m_mutex);
+
+	if (m_port->Write((void *)command.c_str(), command.length()) != (ssize_t) command.length())
 	{
 		return false;
 	}
 
-	m_condition.Wait(m_mutex, m_gotResponse);
 	m_gotResponse = false;
+	m_condition.Wait(m_mutex, m_gotResponse);
 
 	return !strncmp(m_response, response, strlen(response));
 }

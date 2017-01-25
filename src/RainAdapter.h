@@ -16,9 +16,11 @@
 class RainAdapter: public P8PLATFORM::CThread
 {
 public:
-	RainAdapter(const char *deviceName, std::map<char, std::vector<std::string> > commandMap);
+	RainAdapter(const char *deviceName);
 
 	virtual ~RainAdapter(void);
+
+	void processCommands(std::map<char, std::vector<std::string> > commandMap);
 
 	/** @name P8PLATFORM::CThread implementation */
 	///{
@@ -36,7 +38,7 @@ private:
      *
      * Return true on success, else false.
      */
-    bool WriteAdapterCommand(char *command, const char *response);
+    bool WriteAdapterCommand(std::string &command, const char *response);
 
     P8PLATFORM::ISocket *m_port; /**< the com port connection */
 	P8PLATFORM::CMutex m_mutex;
