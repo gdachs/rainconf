@@ -156,12 +156,13 @@ bool RainAdapter::WriteAdapterCommand(std::string &command, const char *response
 {
 	CLockObject lock(m_mutex);
 
+	m_gotResponse = false;
+
 	if (m_port->Write((void *)command.c_str(), command.length()) != (ssize_t) command.length())
 	{
 		return false;
 	}
 
-	m_gotResponse = false;
 	m_condition.Wait(m_mutex, m_gotResponse);
 
 	return !strncmp(m_response, response, strlen(response));
