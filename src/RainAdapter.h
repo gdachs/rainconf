@@ -38,11 +38,13 @@ private:
      *
      * Return true on success, else false.
      */
-    bool WriteAdapterCommand(std::string &command, const char *response);
+    bool WriteAdapterCommand(std::string &command, const std::string &responseType);
+
+    void printResponse();
 
     P8PLATFORM::ISocket *m_port; /**< the com port connection */
 	P8PLATFORM::CMutex m_mutex;
-	char m_response[DATA_SIZE]; /**< current response from adapter */
+	std::string m_response; /**< current response from adapter */
 	P8PLATFORM::CCondition<bool> m_condition;
 	bool m_gotResponse;
 	std::map<char, std::string> m_commandResponseMap;

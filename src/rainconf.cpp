@@ -32,6 +32,7 @@ void usage()
 		   "-P --set-physical-address <physical address>[,<device type>]"				<< std::endl <<
 		   "-q --get-current-retry-count" 												<< std::endl <<
 		   "-Q --set-current-retry-count <retry count>" 								<< std::endl <<
+           "-r --get-revision"                                                          << std::endl <<
 		   "-X --send-raw-command \"<raw command>\"" 									<< std::endl <<
 		   "-h --help" 																	<< std::endl;
 }
@@ -55,6 +56,7 @@ int main(int argc, char * argv[])
 	{ "set-physical-address", required_argument, 0, 'P' },
 	{ "get-current-retry-count", no_argument, 0, 'q' },
 	{ "set-current-retry-count", required_argument, 0, 'Q' },
+    { "get-revision", no_argument, 0, 'r' },
 	{ "send-raw-command", required_argument, 0, 'X' },
 	{ "help", no_argument, 0, 'h' },
 	{ 0, 0, 0, 0 }, };

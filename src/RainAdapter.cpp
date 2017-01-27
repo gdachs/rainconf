@@ -4,6 +4,7 @@
 #include "serialport.h"
 #include "RainAdapter.h"
 #include "CreateMap.h"
+#include "Split.h"
 
 using namespace P8PLATFORM;
 
@@ -48,7 +49,7 @@ void RainAdapter::processCommands(
 		if (WriteAdapterCommand(command,
 				m_commandResponseMap[cmdIt->first].c_str()))
 		{
-			std::cout << m_response << std::endl;
+		    printResponse();
 		}
 		else
 		{
@@ -152,7 +153,7 @@ void RainAdapter::Close(void)
 		m_port->Close();
 }
 
-bool RainAdapter::WriteAdapterCommand(std::string &command, const char *response)
+bool RainAdapter::WriteAdapterCommand(std::string &command, const std::string &responseType)
 {
 	CLockObject lock(m_mutex);
 
@@ -165,7 +166,46 @@ bool RainAdapter::WriteAdapterCommand(std::string &command, const char *response
 
 	m_condition.Wait(m_mutex, m_gotResponse);
 
-	return !strncmp(m_response, response, strlen(response));
+    return !m_response.substr(0, responseType.length()).compare(responseType);
+}
+
+void RainAdapter::printResponse()
+{
+    std::vector<std::string> respVec;
+
+    switch (m_response[0])
+    {
+    case 'A':
+    case 'B':
+        respVec = split(m_response, ' ');
+        std::cout << "LOGICAL_ADDRESS=" << respVec[1] << std::endl << "BIT_FIELD=" << respVec[2] << std::endl;
+        break;
+    case 'C':
+        std::cout << "CONFIGURATION_BITS=" <<  m_response.substr(4) << std::endl;
+        break;
+    case 'M':
+        std::cout << "MIRROR=\"" <<  m_response.substr(4) << "\"" << std::endl;
+        break;
+    case 'O':
+        std::cout << "OSD_NAME=\"" <<  m_response.substr(4) << "\"" << std::endl;
+        break;
+    case 'P':
+        respVec = split(m_response, ' ');
+        std::cout << "PHYSICAL_ADDRESS=" << respVec[1] << std::endl << "DEVICE_TYPE=" << respVec[2] << std::endl;
+        break;
+    case 'Q':
+        std::cout << "RETRY_COUNT=" <<  m_response.substr(4) << std::endl;
+        break;
+    case 'R':
+        std::cout << "REVISION=" <<  m_response.substr(4) << std::endl;
+        break;
+    case 'S':
+        std::cout << "SENDING_STATUS=" <<  m_response.substr(4) << std::endl;
+        break;
+    default:
+        /* do nothing */
+        break;
+    }
 }
 
 void *RainAdapter::Process(void)
@@ -203,8 +243,7 @@ void *RainAdapter::Process(void)
 				std::cout << buf << std::endl;
 			else
 			{
-				strncpy(m_response, buf, sizeof(m_response));
-
+				m_response = buf;
 				m_gotResponse = true;
 				m_condition.Signal();
 			}
